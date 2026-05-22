@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsightX AI Sales & Revenue Analytics Dashboard</title>
+    
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- PapaParse for CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- SheetJS for Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    
+    <!-- Handsontable for Spreadsheet -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+    
+    <!-- html2pdf for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Particles.js for background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tsparticles/2.12.0/tsparticles.bundle.min.js"></script>
+    
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <!-- Floating Particles Background -->
+    <div id="tsparticles"></div>
+    
+    <!-- Mouse Glow Effect -->
+    <div class="mouse-glow"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span class="logo-text">InsightX</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul class="nav-menu">
+                <li class="nav-item active" data-section="dashboard">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-section="analytics">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-analytics"></i>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-section="reports">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-file-alt"></i>
+                        <span class="nav-text">Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-section="calendar">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calendar"></i>
+                        <span class="nav-text">Calendar</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-section="insights">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-lightbulb"></i>
+                        <span class="nav-text">AI Insights</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-section="upload">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span class="nav-text">Upload Data</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-section="settings">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="theme-selector">
+                <label for="themeSelect">Theme:</label>
+                <select id="themeSelect" class="theme-select">
+                    <option value="dark-neon">Dark Neon</option>
+                    <option value="ocean-blue">Ocean Blue</option>
+                    <option value="purple-glass">Purple Glass</option>
+                    <option value="cyberpunk">Cyberpunk</option>
+                </select>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Top Navbar -->
+        <nav class="navbar">
+            <div class="navbar-left">
+                <h1 class="navbar-title">InsightX AI Sales & Revenue Analytics Dashboard</h1>
+            </div>
+            
+            <div class="navbar-center">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search analytics...">
+                </div>
+            </div>
+            
+            <div class="navbar-right">
+                <div class="datetime-display">
+                    <span id="currentTime">00:00:00</span>
+                    <span id="currentDate">Jan 01, 2026</span>
+                </div>
+                
+                <button class="navbar-btn notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                
+                <button class="navbar-btn theme-toggle" id="themeToggle" title="Toggle Dark/Light">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <div class="user-profile">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=InsightX" alt="User">
+                    <span class="user-name">Admin</span>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Notification Center -->
+        <div class="notification-center" id="notificationCenter">
+            <div class="notification-header">
+                <h3>Notifications</h3>
+                <button class="close-btn" id="closeNotificationCenter">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="notification-list">
+                <div class="notification-item">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <p class="notification-title">Dashboard Loaded</p>
+                        <p class="notification-time">Just now</p>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <p class="notification-title">New Data Available</p>
+                        <p class="notification-time">2 hours ago</p>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <i class="fas fa-star"></i>
+                    <div>
+                        <p class="notification-title">Monthly Report Ready</p>
+                        <p class="notification-time">5 hours ago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h2 class="hero-title">
+                        <span class="gradient-text">Welcome to InsightX AI Dashboard</span>
+                    </h2>
+                    <p class="hero-subtitle">Monitor sales, revenue, analytics, and business insights in real time</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" id="uploadDataBtn">
+                            <i class="fas fa-cloud-upload-alt"></i> Upload Data
+                        </button>
+                        <button class="btn btn-secondary" id="generateReportBtn">
+                            <i class="fas fa-file-pdf"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+                <div class="hero-illustration">
+                    <div class="floating-cube"></div>
+                </div>
+            </section>
+            
+            <!-- Filters Section -->
+            <section class="filters-section">
+                <div class="filter-group">
+                    <label for="yearFilter">Year:</label>
+                    <select id="yearFilter" class="filter-select">
+                        <option value="2024">2024</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="2026">2026</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="monthFilter">Month:</label>
+                    <select id="monthFilter" class="filter-select">
+                        <option value="">All Months</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3" selected>March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Category:</label>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Home">Home</option>
+                        <option value="Sports">Sports</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="regionFilter">Region:</label>
+                    <select id="regionFilter" class="filter-select">
+                        <option value="">All Regions</option>
+                        <option value="North">North</option>
+                        <option value="South">South</option>
+                        <option value="East">East</option>
+                        <option value="West">West</option>
+                    </select>
+                </div>
+            </section>
+            
+            <!-- KPI Cards Section -->
+            <section class="kpi-section">
+                <div class="kpi-card" data-value="3.45">
+                    <div class="kpi-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <p class="kpi-label">Total Revenue</p>
+                        <h3 class="kpi-value">$<span class="kpi-number">3,450,000</span></h3>
+                        <p class="kpi-change">
+                            <i class="fas fa-arrow-up"></i> 12.5% from last month
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="kpi-card" data-value="1.28">
+                    <div class="kpi-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <p class="kpi-label">Total Sales</p>
+                        <h3 class="kpi-value"><span class="kpi-number">1,280,000</span></h3>
+                        <p class="kpi-change">
+                            <i class="fas fa-arrow-up"></i> 8.3% from last month
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="kpi-card" data-value="45.8">
+                    <div class="kpi-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <p class="kpi-label">Total Orders</p>
+                        <h3 class="kpi-value"><span class="kpi-number">45,800</span></h3>
+                        <p class="kpi-change">
+                            <i class="fas fa-arrow-up"></i> 5.2% from last month
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="kpi-card" data-value="2.14">
+                    <div class="kpi-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <p class="kpi-label">Total Profit</p>
+                        <h3 class="kpi-value">$<span class="kpi-number">2,140,000</span></h3>
+                        <p class="kpi-change">
+                            <i class="fas fa-arrow-up"></i> 15.7% from last month
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="kpi-card" data-value="0.98">
+                    <div class="kpi-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <p class="kpi-label">Top Product</p>
+                        <h3 class="kpi-value">Laptop Pro</h3>
+                        <p class="kpi-change">
+                            <i class="fas fa-fire"></i> 98K units sold
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="kpi-card" data-value="1.5">
+                    <div class="kpi-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <p class="kpi-label">Monthly Growth</p>
+                        <h3 class="kpi-value"><span class="kpi-number">15</span>%</h3>
+                        <p class="kpi-change">
+                            <i class="fas fa-arrow-up"></i> Best performance
+                        </p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="chart-grid">
+                    <!-- Revenue Trend Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Revenue Trend</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn" title="Refresh">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                                <button class="chart-btn" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    
+                    <!-- Monthly Sales Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Monthly Sales</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn" title="Refresh">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                                <button class="chart-btn" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                    
+                    <!-- Category Revenue Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Category Distribution</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn" title="Refresh">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                                <button class="chart-btn" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    
+                    <!-- Top Products Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Top Products</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn" title="Refresh">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                                <button class="chart-btn" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <canvas id="productsChart"></canvas>
+                    </div>
+                    
+                    <!-- Profit Analytics Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Profit Analytics</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn" title="Refresh">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                                <button class="chart-btn" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                    
+                    <!-- Region Performance Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Region Performance</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn" title="Refresh">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                                <button class="chart-btn" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <canvas id="regionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Data Import Section -->
+            <section class="upload-section">
+                <div class="upload-container">
+                    <h3>Data Management</h3>
+                    <div class="upload-options">
+                        <div class="upload-box">
+                            <label for="csvFile" class="upload-label">
+                                <i class="fas fa-file-csv"></i>
+                                <p>Upload CSV</p>
+                                <small>Select a CSV file</small>
+                            </label>
+                            <input type="file" id="csvFile" accept=".csv" class="file-input">
+                        </div>
+                        
+                        <div class="upload-box">
+                            <label for="excelFile" class="upload-label">
+                                <i class="fas fa-file-excel"></i>
+                                <p>Upload Excel</p>
+                                <small>Select an .xlsx file</small>
+                            </label>
+                            <input type="file" id="excelFile" accept=".xlsx,.xls" class="file-input">
+                        </div>
+                        
+                        <button class="upload-box manual-entry-btn" id="manualEntryBtn">
+                            <i class="fas fa-plus-circle"></i>
+                            <p>Manual Entry</p>
+                            <small>Add data manually</small>
+                        </button>
+                    </div>
+                    
+                    <!-- Drag and Drop Area -->
+                    <div class="drag-drop-zone" id="dragDropZone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & Drop CSV or Excel files here</p>
+                        <small>or click to browse</small>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- AI Insights Panel -->
+            <section class="ai-insights-section">
+                <div class="ai-panel">
+                    <div class="ai-header">
+                        <i class="fas fa-brain"></i>
+                        <h3>AI Smart Insights</h3>
+                    </div>
+                    <div class="ai-content">
+                        <div id="aiInsights" class="insights-list">
+                            <!-- Insights will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Calendar Analytics Section -->
+            <section class="calendar-section">
+                <div class="calendar-container">
+                    <h3>Calendar Analytics - Sales Activity Heatmap</h3>
+                    <div id="calendarHeatmap" class="calendar-heatmap"></div>
+                </div>
+            </section>
+            
+            <!-- Sales Table Section -->
+            <section class="table-section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Sales Data</h3>
+                        <div class="table-controls">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="tableSearch" placeholder="Search table...">
+                            </div>
+                            <button class="btn btn-small" id="exportCsvBtn">
+                                <i class="fas fa-file-csv"></i> Export CSV
+                            </button>
+                            <button class="btn btn-small" id="exportExcelBtn">
+                                <i class="fas fa-file-excel"></i> Export Excel
+                            </button>
+                            <button class="btn btn-small" id="printTableBtn">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Revenue</th>
+                                <th>Profit</th>
+                                <th>Quantity</th>
+                                <th>Region</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Table rows will be populated here -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="table-pagination">
+                        <span id="paginationInfo">Showing 1 to 10 of 100</span>
+                        <div class="pagination-buttons">
+                            <button class="page-btn" id="prevPage">Previous</button>
+                            <div id="pageNumbers" class="page-numbers"></div>
+                            <button class="page-btn" id="nextPage">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <p>&copy; 2026 InsightX AI. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="#">Privacy</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Support</a>
+                </div>
+            </footer>
+        </div>
+    </main>
+    
+    <!-- Floating AI Chat Widget -->
+    <div class="chat-widget" id="chatWidget">
+        <div class="chat-header">
+            <h4>AI Assistant</h4>
+            <button class="chat-close-btn" id="chatToggle">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message bot-message">
+                <p>Hello! I'm your AI assistant. Ask me anything about your sales data!</p>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Ask me...">
+            <button id="chatSendBtn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Chat Toggle Button -->
+    <button class="chat-toggle-btn" id="chatToggleBtn">
+        <i class="fas fa-comments"></i>
+    </button>
+    
+    <!-- Spreadsheet Modal -->
+    <div class="modal" id="spreadsheetModal">
+        <div class="modal-content spreadsheet-modal-content">
+            <div class="modal-header">
+                <h2>Manual Data Entry</h2>
+                <button class="close-modal-btn" id="closeSpreadsheetModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="spreadsheet" style="width: 100%; height: 400px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelSpreadsheetBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveSpreadsheetBtn">Save Data</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+    
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
